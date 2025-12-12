@@ -80,6 +80,7 @@ stream-capture -url <M3U8_URL> -count <SEGMENT_COUNT> -output <OUTPUT_FILE> [-in
 - `--subtitle` (optional): Extract subtitles from audio using OpenAI Whisper (automatically enables audio extraction, MP3 file will be deleted after subtitle extraction)
 - `--subtitle-output` (optional): Output path for subtitle file (default: `<audio-file>.srt`)
 - `--subtitle-language` (optional): Language code for subtitle extraction (e.g., tr, en). Auto-detect if not specified
+- `--subtitle-model` (optional): Whisper model to use (tiny, base, small, medium, large, large-v2, large-v3). Default: base
 
 ### Examples
 
@@ -101,6 +102,9 @@ stream-capture -url https://example.com/stream.m3u8 -count 20 -merge output.ts -
 
 # Extract audio and subtitles with specific language
 stream-capture -url https://example.com/stream.m3u8 -count 20 -merge output.ts -audio --subtitle --subtitle-language tr
+
+# Extract subtitles with specific model (e.g., large for better accuracy)
+stream-capture -url https://example.com/stream.m3u8 -count 20 -merge output.ts -audio --subtitle --subtitle-model large
 
 # Extract only audio and subtitles (no video file)
 stream-capture -url https://example.com/stream.m3u8 -count 20 --audio-only --audio-output output.mp3 --subtitle

@@ -27,6 +27,7 @@ func executeCapture(
 	extractSubtitle bool,
 	subtitleOutput string,
 	subtitleLanguage string,
+	subtitleModel string,
 ) error {
 	// Create temporary directory for segments
 	tempDir, err := os.MkdirTemp("", "stream-capture-*")
@@ -216,8 +217,8 @@ func executeCapture(
 				subtitleOutputPath = audioOutputPath[:len(audioOutputPath)-len(ext)] + ".srt"
 			}
 
-			fmt.Printf("Extracting subtitles to: %s\n", subtitleOutputPath)
-			if err := subtitleExtractor.ExtractSubtitle(audioOutputPath, subtitleOutputPath, subtitleLanguage); err != nil {
+			fmt.Printf("Extracting subtitles to: %s (model: %s)\n", subtitleOutputPath, subtitleModel)
+			if err := subtitleExtractor.ExtractSubtitle(audioOutputPath, subtitleOutputPath, subtitleLanguage, subtitleModel); err != nil {
 				return fmt.Errorf("error extracting subtitles: %w", err)
 			}
 			fmt.Printf("Successfully extracted subtitles to %s\n", subtitleOutputPath)

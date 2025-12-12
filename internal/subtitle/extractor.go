@@ -29,7 +29,8 @@ func NewExtractor() (*Extractor, error) {
 
 // ExtractSubtitle extracts subtitles from an audio file using Whisper.
 // Returns the path to the output subtitle file (SRT format).
-func (e *Extractor) ExtractSubtitle(audioPath string, outputPath string, language string) error {
+// model can be: tiny, base, small, medium, large, large-v2, large-v3 (default: base)
+func (e *Extractor) ExtractSubtitle(audioPath string, outputPath string, language string, model string) error {
 	// Ensure output directory exists
 	outputDir := filepath.Dir(outputPath)
 	if err := os.MkdirAll(outputDir, 0755); err != nil {
@@ -37,13 +38,17 @@ func (e *Extractor) ExtractSubtitle(audioPath string, outputPath string, languag
 	}
 
 	// Whisper command arguments
-	// --model: use base model (faster, good quality)
+	// --model: model to use (default: base)
 	// --output_dir: directory for output files
 	// --output_format: srt format
 	// --language: optional language code (e.g., "tr", "en")
+	if model == "" {
+		model = "base" // Default model
+	}
+
 	args := []string{
 		audioPath,
-		"--model", "base",
+		"--model", model,
 		"--output_dir", outputDir,
 		"--output_format", "srt",
 	}

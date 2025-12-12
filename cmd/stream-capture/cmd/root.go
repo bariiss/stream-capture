@@ -20,6 +20,7 @@ var (
 	extractSubtitle  bool
 	subtitleOutput   string
 	subtitleLanguage string
+	subtitleModel    string
 )
 
 // rootCmd represents the base command when called without any subcommands
@@ -55,6 +56,7 @@ func init() {
 	rootCmd.Flags().BoolVar(&extractSubtitle, "subtitle", false, "Extract subtitles from audio using Whisper")
 	rootCmd.Flags().StringVar(&subtitleOutput, "subtitle-output", "", "Output path for subtitle file (default: <audio-file>.srt)")
 	rootCmd.Flags().StringVar(&subtitleLanguage, "subtitle-language", "", "Language code for subtitle extraction (e.g., tr, en). Auto-detect if not specified")
+	rootCmd.Flags().StringVar(&subtitleModel, "subtitle-model", "base", "Whisper model to use (tiny, base, small, medium, large, large-v2, large-v3). Default: base")
 }
 
 func runCapture(cmd *cobra.Command, args []string) error {
@@ -85,5 +87,5 @@ func runCapture(cmd *cobra.Command, args []string) error {
 	}
 
 	// Import here to avoid circular dependencies
-	return executeCapture(playlistURL, segmentCount, finalOutputFile, pollInterval, extractAudio, audioOnly, audioOutput, extractSubtitle, subtitleOutput, subtitleLanguage)
+	return executeCapture(playlistURL, segmentCount, finalOutputFile, pollInterval, extractAudio, audioOnly, audioOutput, extractSubtitle, subtitleOutput, subtitleLanguage, subtitleModel)
 }
