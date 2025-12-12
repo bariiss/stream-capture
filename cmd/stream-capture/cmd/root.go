@@ -15,6 +15,7 @@ var (
 	outputFile   string
 	pollInterval time.Duration
 	extractAudio bool
+	audioOnly    bool
 	audioOutput  string
 )
 
@@ -46,6 +47,7 @@ func init() {
 	rootCmd.Flags().StringVarP(&outputFile, "output", "o", "", "Output file for merged segments (alternative to -merge)")
 	rootCmd.Flags().DurationVarP(&pollInterval, "interval", "i", 2*time.Second, "Playlist polling interval")
 	rootCmd.Flags().BoolVarP(&extractAudio, "audio", "a", false, "Extract audio as MP3 from the merged video file")
+	rootCmd.Flags().BoolVar(&audioOnly, "audio-only", false, "Extract only audio (video file will be deleted after extraction)")
 	rootCmd.Flags().StringVar(&audioOutput, "audio-output", "", "Output path for audio file (default: <merge-file>.mp3)")
 }
 
@@ -56,10 +58,21 @@ func runCapture(cmd *cobra.Command, args []string) error {
 		finalOutputFile = outputFile
 	}
 
-	if finalOutputFile == "" {
+	// If audio-only is enabled, automatically enable audio extraction
+	if audioOnly {
+		extractAudio = true
+		// In audio-only mode, audio-output is required
+		if audioOutput == "" {
+			return fmt.Errorf("--audio-output is required when using --audio-only")
+		}
+		// If no output file specified, use temporary file
+		if finalOutputFile == "" {
+			finalOutputFile = os.TempDir() + "/stream-capture-temp.ts"
+		}
+	} else if finalOutputFile == "" {
 		return fmt.Errorf("either -output or -merge flag is required")
 	}
 
 	// Import here to avoid circular dependencies
-	return executeCapture(playlistURL, segmentCount, finalOutputFile, pollInterval, extractAudio, audioOutput)
+	return executeCapture(playlistURL, segmentCount, finalOutputFile, pollInterval, extractAudio, audioOnly, audioOutput)
 }

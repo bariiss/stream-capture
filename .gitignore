@@ -23,6 +23,7 @@ go.work
 tmp/
 temp/
 *.ts
+*.mp3
 segments/
 
 # IDE

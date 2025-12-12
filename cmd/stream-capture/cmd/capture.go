@@ -21,6 +21,7 @@ func executeCapture(
 	outputFile string,
 	pollInterval time.Duration,
 	extractAudio bool,
+	audioOnly bool,
 	audioOutput string,
 ) error {
 	// Create temporary directory for segments
@@ -158,11 +159,22 @@ func executeCapture(
 		}
 	}
 
-	if err := manager.MergeSegments(outputFile, downloadedSequences); err != nil {
-		return fmt.Errorf("error merging segments: %w", err)
+	// Only merge video if not audio-only mode
+	var tempVideoFile string
+	if !audioOnly {
+		if err := manager.MergeSegments(outputFile, downloadedSequences); err != nil {
+			return fmt.Errorf("error merging segments: %w", err)
+		}
+		fmt.Printf("Successfully merged segments into %s\n", outputFile)
+		tempVideoFile = outputFile
+	} else {
+		// For audio-only, create temporary video file
+		tempVideoFile = outputFile
+		if err := manager.MergeSegments(tempVideoFile, downloadedSequences); err != nil {
+			return fmt.Errorf("error merging segments: %w", err)
+		}
+		fmt.Printf("Merged segments to temporary file for audio extraction\n")
 	}
-
-	fmt.Printf("Successfully merged segments into %s\n", outputFile)
 
 	// Extract audio if requested
 	if extractAudio {
@@ -180,10 +192,19 @@ func executeCapture(
 		}
 
 		fmt.Printf("Extracting audio to: %s\n", audioOutputPath)
-		if err := audioExtractor.ExtractAudio(outputFile, audioOutputPath); err != nil {
+		if err := audioExtractor.ExtractAudio(tempVideoFile, audioOutputPath); err != nil {
 			return fmt.Errorf("error extracting audio: %w", err)
 		}
 		fmt.Printf("Successfully extracted audio to %s\n", audioOutputPath)
+
+		// If audio-only mode, delete the video file
+		if audioOnly {
+			if err := os.Remove(tempVideoFile); err != nil {
+				fmt.Fprintf(os.Stderr, "Warning: failed to remove temporary video file: %v\n", err)
+			} else {
+				fmt.Printf("Removed temporary video file: %s\n", tempVideoFile)
+			}
+		}
 	}
 
 	fmt.Println("Temp directory cleaned up")

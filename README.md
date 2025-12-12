@@ -72,10 +72,11 @@ stream-capture -url <M3U8_URL> -count <SEGMENT_COUNT> -output <OUTPUT_FILE> [-in
 
 - `-url` (required): M3U8 playlist URL
 - `-count` (default: 10): Number of segments to download, starting from the latest available segment
-- `-merge` or `-output` (required): Output file path for merged segments
+- `-merge` or `-output` (required, unless `--audio-only`): Output file path for merged segments
 - `-interval` (default: 2s): Playlist polling interval
 - `-audio` (optional): Extract audio as MP3 from the merged video file
-- `-audio-output` (optional): Output path for audio file (default: `<merge-file>.mp3`)
+- `--audio-only` (optional): Extract only audio (video file will be deleted after extraction)
+- `--audio-output` (required with `--audio-only`, optional otherwise): Output path for audio file (default: `<merge-file>.mp3`)
 
 ### Examples
 
@@ -88,6 +89,9 @@ stream-capture -url <M3U8_URL> -count <SEGMENT_COUNT> -output <OUTPUT_FILE> [-in
 
 # Download with custom audio output path
 ./stream-capture -url https://example.com/stream.m3u8 -count 20 -merge output.ts -audio -audio-output music.mp3
+
+# Extract only audio (video file will be deleted after extraction)
+./stream-capture -url https://example.com/stream.m3u8 -count 20 --audio-only --audio-output output.mp3
 
 # Custom polling interval
 ./stream-capture -url https://example.com/stream.m3u8 -count 30 -merge video.ts -interval 3s
