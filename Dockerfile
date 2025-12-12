@@ -41,7 +41,8 @@ LABEL org.opencontainers.image.title="stream-capture" \
       org.opencontainers.image.created="${BUILD_DATE}" \
       org.opencontainers.image.source="https://github.com/bariiss/stream-capture"
 
-RUN apk --no-cache add ca-certificates tzdata ffmpeg
+RUN apk --no-cache add ca-certificates tzdata ffmpeg python3 py3-pip && \
+    pip3 install --no-cache-dir --break-system-packages openai-whisper
 
 WORKDIR /app
 

@@ -12,6 +12,7 @@ import (
 	"github.com/bariiss/stream-capture/internal/audio"
 	"github.com/bariiss/stream-capture/internal/downloader"
 	"github.com/bariiss/stream-capture/internal/hls"
+	"github.com/bariiss/stream-capture/internal/subtitle"
 )
 
 // executeCapture performs the actual stream capture process
@@ -23,6 +24,9 @@ func executeCapture(
 	extractAudio bool,
 	audioOnly bool,
 	audioOutput string,
+	extractSubtitle bool,
+	subtitleOutput string,
+	subtitleLanguage string,
 ) error {
 	// Create temporary directory for segments
 	tempDir, err := os.MkdirTemp("", "stream-capture-*")
@@ -196,6 +200,35 @@ func executeCapture(
 			return fmt.Errorf("error extracting audio: %w", err)
 		}
 		fmt.Printf("Successfully extracted audio to %s\n", audioOutputPath)
+
+		// Extract subtitles if requested
+		if extractSubtitle {
+			subtitleExtractor, err := subtitle.NewExtractor()
+			if err != nil {
+				return fmt.Errorf("error initializing subtitle extractor: %w", err)
+			}
+
+			// Determine subtitle output path
+			subtitleOutputPath := subtitleOutput
+			if subtitleOutputPath == "" {
+				// Default to same name as audio file but with .srt extension
+				ext := filepath.Ext(audioOutputPath)
+				subtitleOutputPath = audioOutputPath[:len(audioOutputPath)-len(ext)] + ".srt"
+			}
+
+			fmt.Printf("Extracting subtitles to: %s\n", subtitleOutputPath)
+			if err := subtitleExtractor.ExtractSubtitle(audioOutputPath, subtitleOutputPath, subtitleLanguage); err != nil {
+				return fmt.Errorf("error extracting subtitles: %w", err)
+			}
+			fmt.Printf("Successfully extracted subtitles to %s\n", subtitleOutputPath)
+
+			// After subtitle extraction, remove MP3 file as it's no longer needed
+			if err := os.Remove(audioOutputPath); err != nil {
+				fmt.Fprintf(os.Stderr, "Warning: failed to remove audio file: %v\n", err)
+			} else {
+				fmt.Printf("Removed audio file: %s\n", audioOutputPath)
+			}
+		}
 
 		// If audio-only mode, delete the video file
 		if audioOnly {

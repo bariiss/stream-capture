@@ -77,24 +77,36 @@ stream-capture -url <M3U8_URL> -count <SEGMENT_COUNT> -output <OUTPUT_FILE> [-in
 - `-audio` (optional): Extract audio as MP3 from the merged video file
 - `--audio-only` (optional): Extract only audio (video file will be deleted after extraction)
 - `--audio-output` (required with `--audio-only`, optional otherwise): Output path for audio file (default: `<merge-file>.mp3`)
+- `--subtitle` (optional): Extract subtitles from audio using OpenAI Whisper (automatically enables audio extraction, MP3 file will be deleted after subtitle extraction)
+- `--subtitle-output` (optional): Output path for subtitle file (default: `<audio-file>.srt`)
+- `--subtitle-language` (optional): Language code for subtitle extraction (e.g., tr, en). Auto-detect if not specified
 
 ### Examples
 
 ```bash
 # Download last 20 segments and merge into output.ts
-./stream-capture -url https://example.com/stream.m3u8 -count 20 -merge output.ts
+stream-capture -url https://example.com/stream.m3u8 -count 20 -merge output.ts
 
 # Download and extract audio as MP3 (outputs to output.mp3)
-./stream-capture -url https://example.com/stream.m3u8 -count 20 -merge output.ts -audio
+stream-capture -url https://example.com/stream.m3u8 -count 20 -merge output.ts -audio
 
 # Download with custom audio output path
-./stream-capture -url https://example.com/stream.m3u8 -count 20 -merge output.ts -audio -audio-output music.mp3
+stream-capture -url https://example.com/stream.m3u8 -count 20 -merge output.ts -audio -audio-output music.mp3
 
 # Extract only audio (video file will be deleted after extraction)
-./stream-capture -url https://example.com/stream.m3u8 -count 20 --audio-only --audio-output output.mp3
+stream-capture -url https://example.com/stream.m3u8 -count 20 --audio-only --audio-output output.mp3
+
+# Extract audio and subtitles
+stream-capture -url https://example.com/stream.m3u8 -count 20 -merge output.ts -audio --subtitle
+
+# Extract audio and subtitles with specific language
+stream-capture -url https://example.com/stream.m3u8 -count 20 -merge output.ts -audio --subtitle --subtitle-language tr
+
+# Extract only audio and subtitles (no video file)
+stream-capture -url https://example.com/stream.m3u8 -count 20 --audio-only --audio-output output.mp3 --subtitle
 
 # Custom polling interval
-./stream-capture -url https://example.com/stream.m3u8 -count 30 -merge video.ts -interval 3s
+stream-capture -url https://example.com/stream.m3u8 -count 30 -merge video.ts -interval 3s
 ```
 
 ## How It Works
@@ -125,6 +137,12 @@ stream-capture -url <M3U8_URL> -count <SEGMENT_COUNT> -output <OUTPUT_FILE> [-in
   - Supports MP3 encoding with configurable bitrate and sample rate
   - Requires FFmpeg to be installed in the system
 
+- **`internal/subtitle`**: Handles subtitle extraction from audio files
+  - `Extractor`: Uses OpenAI Whisper to extract subtitles from audio
+  - Supports SRT format output
+  - Language detection or manual language specification
+  - Requires Whisper to be installed in the system
+
 ### Design Decisions
 
 - **Pointers**: Used extensively to reduce memory allocations and copying
@@ -141,6 +159,10 @@ stream-capture -url <M3U8_URL> -count <SEGMENT_COUNT> -output <OUTPUT_FILE> [-in
   - On Ubuntu/Debian: `apt-get install ffmpeg`
   - On Alpine: `apk add ffmpeg`
   - On Windows: Download from [ffmpeg.org](https://ffmpeg.org/download.html)
+- OpenAI Whisper (for subtitle extraction feature)
+  - On macOS: `brew install openai-whisper`
+  - On Linux: `pip install openai-whisper` (requires Python 3.8+)
+  - On Windows: `pip install openai-whisper` (requires Python 3.8+)
 
 ## License
 

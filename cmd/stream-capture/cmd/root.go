@@ -9,14 +9,17 @@ import (
 )
 
 var (
-	playlistURL  string
-	segmentCount int
-	mergeFile    string
-	outputFile   string
-	pollInterval time.Duration
-	extractAudio bool
-	audioOnly    bool
-	audioOutput  string
+	playlistURL      string
+	segmentCount     int
+	mergeFile        string
+	outputFile       string
+	pollInterval     time.Duration
+	extractAudio     bool
+	audioOnly        bool
+	audioOutput      string
+	extractSubtitle  bool
+	subtitleOutput   string
+	subtitleLanguage string
 )
 
 // rootCmd represents the base command when called without any subcommands
@@ -49,6 +52,9 @@ func init() {
 	rootCmd.Flags().BoolVarP(&extractAudio, "audio", "a", false, "Extract audio as MP3 from the merged video file")
 	rootCmd.Flags().BoolVar(&audioOnly, "audio-only", false, "Extract only audio (video file will be deleted after extraction)")
 	rootCmd.Flags().StringVar(&audioOutput, "audio-output", "", "Output path for audio file (default: <merge-file>.mp3)")
+	rootCmd.Flags().BoolVar(&extractSubtitle, "subtitle", false, "Extract subtitles from audio using Whisper")
+	rootCmd.Flags().StringVar(&subtitleOutput, "subtitle-output", "", "Output path for subtitle file (default: <audio-file>.srt)")
+	rootCmd.Flags().StringVar(&subtitleLanguage, "subtitle-language", "", "Language code for subtitle extraction (e.g., tr, en). Auto-detect if not specified")
 }
 
 func runCapture(cmd *cobra.Command, args []string) error {
@@ -56,6 +62,11 @@ func runCapture(cmd *cobra.Command, args []string) error {
 	finalOutputFile := mergeFile
 	if finalOutputFile == "" {
 		finalOutputFile = outputFile
+	}
+
+	// If subtitle is enabled, automatically enable audio extraction (subtitle needs audio)
+	if extractSubtitle {
+		extractAudio = true
 	}
 
 	// If audio-only is enabled, automatically enable audio extraction
@@ -74,5 +85,5 @@ func runCapture(cmd *cobra.Command, args []string) error {
 	}
 
 	// Import here to avoid circular dependencies
-	return executeCapture(playlistURL, segmentCount, finalOutputFile, pollInterval, extractAudio, audioOnly, audioOutput)
+	return executeCapture(playlistURL, segmentCount, finalOutputFile, pollInterval, extractAudio, audioOnly, audioOutput, extractSubtitle, subtitleOutput, subtitleLanguage)
 }
