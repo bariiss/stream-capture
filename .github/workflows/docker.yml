@@ -15,7 +15,7 @@ permissions:
 
 env:
   GO_VERSION: '1.25'
-  IMAGE_NAME: ghcr.io/${{ github.repository }}/stream-capture
+  IMAGE_NAME: ghcr.io/bariiss/stream-capture
 
 concurrency:
   group: docker-image-stream-capture-${{ github.ref }}
