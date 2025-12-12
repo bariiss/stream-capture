@@ -25,11 +25,27 @@ stream-capture/
 
 ## Installation
 
+### Using go install (Recommended)
+
+Install the latest version:
+
 ```bash
 go install github.com/bariiss/stream-capture/cmd/stream-capture@latest
 ```
 
-Or build from source:
+Or install a specific version:
+
+```bash
+go install github.com/bariiss/stream-capture/cmd/stream-capture@v1.0.3
+```
+
+After installation, make sure `$GOPATH/bin` or `$HOME/go/bin` is in your `PATH`:
+
+```bash
+export PATH=$PATH:$(go env GOPATH)/bin
+```
+
+### Build from source
 
 ```bash
 git clone https://github.com/bariiss/stream-capture.git
