@@ -222,13 +222,6 @@ func executeCapture(
 				return fmt.Errorf("error extracting subtitles: %w", err)
 			}
 			fmt.Printf("Successfully extracted subtitles to %s\n", subtitleOutputPath)
-
-			// After subtitle extraction, remove MP3 file as it's no longer needed
-			if err := os.Remove(audioOutputPath); err != nil {
-				fmt.Fprintf(os.Stderr, "Warning: failed to remove audio file: %v\n", err)
-			} else {
-				fmt.Printf("Removed audio file: %s\n", audioOutputPath)
-			}
 		}
 
 		// If audio-only mode, delete the video file

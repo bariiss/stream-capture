@@ -53,12 +53,84 @@ cd stream-capture
 go build -o stream-capture ./cmd/stream-capture
 ```
 
-Or use Docker:
+### Using Docker
+
+Build the image:
 
 ```bash
-docker build -t stream-capture .
-docker run --rm -v $(pwd):/output stream-capture -url <M3U8_URL> -count 20 -output /output/output.ts
+docker build -t bariiss/stream-capture .
 ```
+
+Or pull from GitHub Container Registry:
+
+```bash
+docker pull ghcr.io/bariiss/stream-capture:latest
+```
+
+Run directly:
+
+```bash
+docker run --rm -v $(pwd)/output:/output bariiss/stream-capture -url <M3U8_URL> -count 20 -output /output/output.ts
+```
+
+### Using Docker Compose (Recommended for Whisper)
+
+Docker Compose automatically manages Whisper model storage, so models are downloaded once and reused.
+
+#### Option 1: Configure in docker-compose.yml
+
+Edit `docker-compose.yml` and set your parameters:
+
+```yaml
+environment:
+  - STREAM_URL=https://example.com/stream.m3u8
+  - SEGMENT_COUNT=10
+  - POLL_INTERVAL=2s
+
+command:
+  - "-u"
+  - "${STREAM_URL}"
+  - "-c"
+  - "${SEGMENT_COUNT}"
+  - "-interval"
+  - "${POLL_INTERVAL}"
+  - "--audio-only"
+  - "--audio-output"
+  - "/output/output.mp3"
+  - "--subtitle"
+  - "--subtitle-model"
+  - "large"
+  - "--subtitle-output"
+  - "/output/output.srt"
+```
+
+Then run:
+
+```bash
+# Create output directory
+mkdir -p output
+
+# Run with docker-compose (uses configuration from docker-compose.yml)
+docker-compose up --rm
+```
+
+#### Option 2: Override command at runtime
+
+Override parameters at runtime without modifying docker-compose.yml:
+
+```bash
+# Override parameters at runtime
+docker-compose run --rm stream-capture \
+  -u "https://example.com/stream.m3u8" \
+  -c 20 \
+  --audio-only \
+  --audio-output /output/output.mp3 \
+  --subtitle \
+  --subtitle-model large \
+  --subtitle-output /output/output.srt
+```
+
+The `docker-compose.yml` creates a persistent volume for Whisper models (`whisper-models`), so models are downloaded only once and reused across runs. This significantly speeds up subtitle extraction after the first run.
 
 ## Usage
 
@@ -77,7 +149,7 @@ stream-capture -url <M3U8_URL> -count <SEGMENT_COUNT> -output <OUTPUT_FILE> [-in
 - `-audio` (optional): Extract audio as MP3 from the merged video file
 - `--audio-only` (optional): Extract only audio (video file will be deleted after extraction)
 - `--audio-output` (required with `--audio-only`, optional otherwise): Output path for audio file (default: `<merge-file>.mp3`)
-- `--subtitle` (optional): Extract subtitles from audio using OpenAI Whisper (automatically enables audio extraction, MP3 file will be deleted after subtitle extraction)
+- `--subtitle` (optional): Extract subtitles from audio using OpenAI Whisper (automatically enables audio extraction, MP3 file will be preserved)
 - `--subtitle-output` (optional): Output path for subtitle file (default: `<audio-file>.srt`)
 - `--subtitle-language` (optional): Language code for subtitle extraction (e.g., tr, en). Auto-detect if not specified
 - `--subtitle-model` (optional): Whisper model to use (tiny, base, small, medium, large, large-v2, large-v3). Default: base

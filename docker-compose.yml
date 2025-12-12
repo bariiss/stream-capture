@@ -1,0 +1,40 @@
+services:
+  stream-capture:
+    # build:
+    #   context: .
+    #   dockerfile: Dockerfile
+    #   args:
+    #     - VCS_REF=$(git rev-parse HEAD)
+    #     - BUILD_DATE=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+    #     - VERSION=$(git describe --tags --abbrev=0)
+    #     - GO_VERSION=1.25
+    image: ghcr.io/bariiss/stream-capture:v1.1.2
+    container_name: stream-capture
+    volumes:
+      - ./output:/output
+      - whisper-models:/root/.cache/whisper
+    environment:
+      - WHISPER_CACHE_DIR=/root/.cache/whisper
+    entrypoint: ["./stream-capture"]
+    command:
+      - "-u"
+      - "https://example.com/stream.m3u8"
+      - "-c"
+      - "10"
+      - "--interval"
+      - "2s"
+      - "--merge"
+      - "/output/output.ts"
+      - "--audio"
+      - "--audio-output"
+      - "/output/output.mp3"
+      - "--subtitle"
+      - "--subtitle-model"
+      - "base"
+      - "--subtitle-output"
+      - "/output/output.srt"
+
+volumes:
+  whisper-models:
+    driver: local
+    name: stream-capture-whisper-models
