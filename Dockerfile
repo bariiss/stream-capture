@@ -41,7 +41,7 @@ LABEL org.opencontainers.image.title="stream-capture" \
       org.opencontainers.image.created="${BUILD_DATE}" \
       org.opencontainers.image.source="https://github.com/bariiss/stream-capture"
 
-RUN apk --no-cache add ca-certificates tzdata
+RUN apk --no-cache add ca-certificates tzdata ffmpeg
 
 WORKDIR /app
 

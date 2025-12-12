@@ -63,9 +63,9 @@ docker run --rm -v $(pwd):/output stream-capture -url <M3U8_URL> -count 20 -outp
 ## Usage
 
 ```bash
-stream-capture -url <M3U8_URL> -count <SEGMENT_COUNT> -merge <OUTPUT_FILE> [-interval <DURATION>]
+stream-capture -url <M3U8_URL> -count <SEGMENT_COUNT> -merge <OUTPUT_FILE> [-interval <DURATION>] [-audio] [-audio-output <AUDIO_FILE>]
 # or
-stream-capture -url <M3U8_URL> -count <SEGMENT_COUNT> -output <OUTPUT_FILE> [-interval <DURATION>]
+stream-capture -url <M3U8_URL> -count <SEGMENT_COUNT> -output <OUTPUT_FILE> [-interval <DURATION>] [-audio] [-audio-output <AUDIO_FILE>]
 ```
 
 ### Parameters
@@ -74,6 +74,8 @@ stream-capture -url <M3U8_URL> -count <SEGMENT_COUNT> -output <OUTPUT_FILE> [-in
 - `-count` (default: 10): Number of segments to download, starting from the latest available segment
 - `-merge` or `-output` (required): Output file path for merged segments
 - `-interval` (default: 2s): Playlist polling interval
+- `-audio` (optional): Extract audio as MP3 from the merged video file
+- `-audio-output` (optional): Output path for audio file (default: `<merge-file>.mp3`)
 
 ### Examples
 
@@ -81,8 +83,11 @@ stream-capture -url <M3U8_URL> -count <SEGMENT_COUNT> -output <OUTPUT_FILE> [-in
 # Download last 20 segments and merge into output.ts
 ./stream-capture -url https://example.com/stream.m3u8 -count 20 -merge output.ts
 
-# Using -output flag (alternative)
-./stream-capture -url https://example.com/stream.m3u8 -count 20 -output output.ts
+# Download and extract audio as MP3 (outputs to output.mp3)
+./stream-capture -url https://example.com/stream.m3u8 -count 20 -merge output.ts -audio
+
+# Download with custom audio output path
+./stream-capture -url https://example.com/stream.m3u8 -count 20 -merge output.ts -audio -audio-output music.mp3
 
 # Custom polling interval
 ./stream-capture -url https://example.com/stream.m3u8 -count 30 -merge video.ts -interval 3s
@@ -111,6 +116,11 @@ stream-capture -url <M3U8_URL> -count <SEGMENT_COUNT> -output <OUTPUT_FILE> [-in
   - Uses streaming to minimize memory footprint
   - Automatic cleanup of temporary files
 
+- **`internal/audio`**: Handles audio extraction from video files
+  - `Extractor`: Uses FFmpeg to extract audio and convert to MP3
+  - Supports MP3 encoding with configurable bitrate and sample rate
+  - Requires FFmpeg to be installed in the system
+
 ### Design Decisions
 
 - **Pointers**: Used extensively to reduce memory allocations and copying
@@ -122,6 +132,11 @@ stream-capture -url <M3U8_URL> -count <SEGMENT_COUNT> -output <OUTPUT_FILE> [-in
 ## Requirements
 
 - Go 1.25 or later
+- FFmpeg (for audio extraction feature)
+  - On macOS: `brew install ffmpeg`
+  - On Ubuntu/Debian: `apt-get install ffmpeg`
+  - On Alpine: `apk add ffmpeg`
+  - On Windows: Download from [ffmpeg.org](https://ffmpeg.org/download.html)
 
 ## License
 
