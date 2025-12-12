@@ -27,7 +27,7 @@ RUN CGO_ENABLED=0 GOOS=linux GOARCH=${TARGETARCH} \
     -o stream-capture ./cmd/stream-capture
 
 # Final stage
-FROM alpine:latest
+FROM python:3.12-slim
 
 ARG VCS_REF
 ARG BUILD_DATE
@@ -41,8 +41,14 @@ LABEL org.opencontainers.image.title="stream-capture" \
       org.opencontainers.image.created="${BUILD_DATE}" \
       org.opencontainers.image.source="https://github.com/bariiss/stream-capture"
 
-RUN apk --no-cache add ca-certificates tzdata ffmpeg python3 py3-pip && \
-    pip3 install --no-cache-dir --break-system-packages openai-whisper
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+    ca-certificates \
+    tzdata \
+    ffmpeg && \
+    pip3 install --no-cache-dir openai-whisper && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 
