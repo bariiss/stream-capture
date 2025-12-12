@@ -18,7 +18,8 @@ func main() {
 	var (
 		playlistURL  = flag.String("url", "", "M3U8 playlist URL")
 		segmentCount = flag.Int("count", 10, "Number of segments to download (starting from the latest)")
-		outputFile   = flag.String("output", "", "Output file for merged segments (required)")
+		outputFile   = flag.String("output", "", "Output file for merged segments (alternative to -merge)")
+		mergeFile    = flag.String("merge", "", "Output file for merged segments (alternative to -output)")
 		pollInterval = flag.Duration("interval", 2*time.Second, "Playlist polling interval")
 	)
 	flag.Parse()
@@ -29,8 +30,14 @@ func main() {
 		os.Exit(1)
 	}
 
-	if *outputFile == "" {
-		fmt.Fprintf(os.Stderr, "Error: -output flag is required\n")
+	// Use -merge if provided, otherwise use -output
+	finalOutputFile := *mergeFile
+	if finalOutputFile == "" {
+		finalOutputFile = *outputFile
+	}
+
+	if finalOutputFile == "" {
+		fmt.Fprintf(os.Stderr, "Error: either -output or -merge flag is required\n")
 		flag.Usage()
 		os.Exit(1)
 	}
@@ -166,10 +173,10 @@ func main() {
 	fmt.Printf("\nSuccessfully downloaded %d segments\n", len(downloadedSequences))
 
 	// Merge segments
-	fmt.Printf("Merging segments into: %s\n", *outputFile)
+	fmt.Printf("Merging segments into: %s\n", finalOutputFile)
 
 	// Ensure output directory exists
-	outputDir := filepath.Dir(*outputFile)
+	outputDir := filepath.Dir(finalOutputFile)
 	if outputDir != "" && outputDir != "." {
 		if err := os.MkdirAll(outputDir, 0755); err != nil {
 			fmt.Fprintf(os.Stderr, "Error creating output directory: %v\n", err)
@@ -177,11 +184,11 @@ func main() {
 		}
 	}
 
-	if err := manager.MergeSegments(*outputFile, downloadedSequences); err != nil {
+	if err := manager.MergeSegments(finalOutputFile, downloadedSequences); err != nil {
 		fmt.Fprintf(os.Stderr, "Error merging segments: %v\n", err)
 		os.Exit(1)
 	}
 
-	fmt.Printf("Successfully merged segments into %s\n", *outputFile)
+	fmt.Printf("Successfully merged segments into %s\n", finalOutputFile)
 	fmt.Println("Temp directory cleaned up")
 }

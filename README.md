@@ -47,6 +47,8 @@ docker run --rm -v $(pwd):/output stream-capture -url <M3U8_URL> -count 20 -outp
 ## Usage
 
 ```bash
+stream-capture -url <M3U8_URL> -count <SEGMENT_COUNT> -merge <OUTPUT_FILE> [-interval <DURATION>]
+# or
 stream-capture -url <M3U8_URL> -count <SEGMENT_COUNT> -output <OUTPUT_FILE> [-interval <DURATION>]
 ```
 
@@ -54,17 +56,20 @@ stream-capture -url <M3U8_URL> -count <SEGMENT_COUNT> -output <OUTPUT_FILE> [-in
 
 - `-url` (required): M3U8 playlist URL
 - `-count` (default: 10): Number of segments to download, starting from the latest available segment
-- `-output` (required): Output file path for merged segments
+- `-merge` or `-output` (required): Output file path for merged segments
 - `-interval` (default: 2s): Playlist polling interval
 
 ### Examples
 
 ```bash
 # Download last 20 segments and merge into output.ts
+./stream-capture -url https://example.com/stream.m3u8 -count 20 -merge output.ts
+
+# Using -output flag (alternative)
 ./stream-capture -url https://example.com/stream.m3u8 -count 20 -output output.ts
 
 # Custom polling interval
-./stream-capture -url https://example.com/stream.m3u8 -count 30 -output video.ts -interval 3s
+./stream-capture -url https://example.com/stream.m3u8 -count 30 -merge video.ts -interval 3s
 ```
 
 ## How It Works
