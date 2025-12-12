@@ -18,6 +18,8 @@ tmp/
 temp/
 segments/
 *.ts
+*.mp3
+*.srt
 
 # IDE
 .idea/

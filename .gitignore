@@ -24,6 +24,7 @@ tmp/
 temp/
 *.ts
 *.mp3
+*.srt
 segments/
 
 # IDE
